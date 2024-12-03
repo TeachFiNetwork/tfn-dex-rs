@@ -1,0 +1,14 @@
+[package]
+name = "tfn-dex-meta"
+version = "0.0.1"
+edition = "2018"
+publish = false
+authors = [ "DrDelphi",]
+
+[dev-dependencies]
+
+[dependencies.tfn-dex]
+path = ".."
+
+[dependencies.multiversx-sc-meta-lib]
+version = "0.54.4"
