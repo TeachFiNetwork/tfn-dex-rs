@@ -1,0 +1,10 @@
+pub static ERROR_NOT_ACTIVE: &[u8] = b"contract is not active";
+pub static ERROR_WRONG_BASE_TOKEN: &[u8] = b"wrong base token";
+pub static ERROR_PAIR_EXISTS: &[u8] = b"pair already exists";
+pub static ERROR_PAIR_NOT_FOUND: &[u8] = b"pair not found";
+pub static ERROR_PAIR_ALREADY_ACTIVE: &[u8] = b"pair already active";
+pub static ERROR_PAIR_NOT_ACTIVE: &[u8] = b"pair not active";
+pub static ERROR_NO_LIQUIDITY: &[u8] = b"no liquidity";
+pub static ERROR_WRONG_PAYMENT: &[u8] = b"wrong payment token(s)";
+pub static ERROR_WRONG_FEE: &[u8] = b"wrong fee";
+pub static ERROR_INSUFFICIENT_OUTPUT_AMOUNT: &[u8] = b"insufficient output amount";
