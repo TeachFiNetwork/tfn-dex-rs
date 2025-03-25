@@ -68,12 +68,17 @@ common::config::ConfigModule
 
                 (amount_in, new_token_liquidity, new_base_liquidity)
             };
+        require!(amount_in > BigUint::zero() && amount_in <= payment.amount, ERROR_INSUFFICIENT_INPUT_AMOUNT);
 
         pair.liquidity_token = new_token_liquidity;
         pair.liquidity_base = new_base_liquidity;
         self.pair(pair.id).set(&pair);
 
-        self.send().direct_esdt(&self.blockchain().get_caller(), &payment.token_identifier, 0, &amount_in);
+        let caller = self.blockchain().get_caller();
+        self.send().direct_esdt(&caller, &token_out, 0, &amount_out_wanted);
+        if amount_in < payment.amount {
+            self.send().direct_esdt(&caller, &payment.token_identifier, 0, &(payment.amount - amount_in));
+        }
     }
 
     fn do_swap_fixed_input(

@@ -8,3 +8,4 @@ pub static ERROR_NO_LIQUIDITY: &[u8] = b"no liquidity";
 pub static ERROR_WRONG_PAYMENT: &[u8] = b"wrong payment token(s)";
 pub static ERROR_WRONG_FEE: &[u8] = b"wrong fee";
 pub static ERROR_INSUFFICIENT_OUTPUT_AMOUNT: &[u8] = b"insufficient output amount";
+pub static ERROR_INSUFFICIENT_INPUT_AMOUNT: &[u8] = b"insufficient input amount";
