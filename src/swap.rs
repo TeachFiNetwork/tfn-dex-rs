@@ -134,4 +134,54 @@ common::config::ConfigModule
             (amount_in, new_liquidity_in, new_liquidity_out, owner_fee)
         }
     }
+
+    #[view(getAmountOut)]
+    fn get_amount_out_view(
+        &self,
+        token_in: &TokenIdentifier,
+        token_out: &TokenIdentifier,
+        amount_in: BigUint,
+    ) -> BigUint {
+        require!(amount_in > 0, ERROR_ZERO_AMOUNT);
+
+        let pair = match self.get_pair_by_tickers(token_in, token_out) {
+            Some(pair) => pair,
+            None => sc_panic!(ERROR_PAIR_NOT_FOUND),
+        };
+        let fee_in = self.base_tokens().contains(token_in);
+        if token_in == &pair.token {
+            require!(pair.liquidity_base > 0, ERROR_NO_LIQUIDITY);
+
+            self.get_amount_out(&amount_in, &pair.liquidity_token, &pair.liquidity_base, fee_in)
+        } else {
+            require!(pair.liquidity_token > 0, ERROR_NO_LIQUIDITY);
+
+            self.get_amount_out(&amount_in, &pair.liquidity_base, &pair.liquidity_token, fee_in)
+        }
+    }
+
+    #[view(getAmountIn)]
+    fn get_amount_in_view(
+        &self,
+        token_in: &TokenIdentifier,
+        token_out: &TokenIdentifier,
+        amount_out: BigUint,
+    ) -> BigUint {
+        require!(amount_out > 0, ERROR_ZERO_AMOUNT);
+
+        let pair = match self.get_pair_by_tickers(token_in, token_out) {
+            Some(pair) => pair,
+            None => sc_panic!(ERROR_PAIR_NOT_FOUND),
+        };
+        let fee_in = self.base_tokens().contains(token_in);
+        if token_in == &pair.token {
+            require!(pair.liquidity_base > 0, ERROR_NO_LIQUIDITY);
+
+            self.get_amount_in(&amount_out, &pair.liquidity_token, &pair.liquidity_base, fee_in)
+        } else {
+            require!(pair.liquidity_token > 0, ERROR_NO_LIQUIDITY);
+
+            self.get_amount_in(&amount_out, &pair.liquidity_base, &pair.liquidity_token, fee_in)
+        }
+    }
 }

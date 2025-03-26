@@ -18,11 +18,11 @@ config::ConfigModule
     fn get_amount_out_no_fee(
         &self,
         amount_in: &BigUint,
-        reserve_in: &BigUint,
-        reserve_out: &BigUint,
+        liquidity_in: &BigUint,
+        liquidity_out: &BigUint,
     ) -> BigUint {
-        let numerator = amount_in * reserve_out;
-        let denominator = reserve_in + amount_in;
+        let numerator = amount_in * liquidity_out;
+        let denominator = liquidity_in + amount_in;
 
         numerator / denominator
     }
@@ -30,13 +30,54 @@ config::ConfigModule
     fn get_amount_in_no_fee(
         &self,
         amount_out: &BigUint,
-        reserve_in: &BigUint,
-        reserve_out: &BigUint,
+        liquidity_in: &BigUint,
+        liquidity_out: &BigUint,
     ) -> BigUint {
-        let numerator = reserve_in * amount_out;
-        let denominator = reserve_out - amount_out;
+        let numerator = liquidity_in * amount_out;
+        let denominator = liquidity_out - amount_out;
 
         (numerator / denominator) + &BigUint::from(1u64)
+    }
+
+    fn get_amount_out(
+        &self,
+        amount_in: &BigUint,
+        liquidity_in: &BigUint,
+        liquidity_out: &BigUint,
+        fee_in: bool,
+    ) -> BigUint {
+        let total_fee = self.lp_fee().get() + self.owner_fee().get();
+        if fee_in {
+            let amount_in_with_fee = amount_in * (MAX_PERCENT - total_fee);
+            let numerator = &amount_in_with_fee * liquidity_out;
+            let denominator = liquidity_in * MAX_PERCENT + amount_in_with_fee;
+
+            numerator / denominator
+        } else {
+            let amount_out_no_fee = self.get_amount_out_no_fee(amount_in, liquidity_in, liquidity_out);
+
+            amount_out_no_fee * (MAX_PERCENT - total_fee) / MAX_PERCENT
+        }
+    }
+
+    fn get_amount_in(
+        &self,
+        amount_out: &BigUint,
+        liquidity_in: &BigUint,
+        liquidity_out: &BigUint,
+        fee_in: bool,
+    ) -> BigUint {
+        let total_fee = self.lp_fee().get() + self.owner_fee().get();
+        if fee_in {
+            let numerator = amount_out * liquidity_in * MAX_PERCENT;
+            let denominator = (liquidity_out - amount_out) * (MAX_PERCENT - total_fee);
+
+            (numerator / denominator) + 1u64
+        } else {
+            let amount_out_with_fee = amount_out * MAX_PERCENT / (MAX_PERCENT - total_fee);
+
+            self.get_amount_in_no_fee(&amount_out_with_fee, liquidity_in, liquidity_out)
+        }
     }
 
     // returns lp fee, owner fee, total fee calculated from amount
