@@ -1,4 +1,4 @@
-use crate::common::{config, errors::*};
+use crate::common::{config, consts::*, errors::*};
 
 multiversx_sc::imports!();
 
@@ -37,6 +37,23 @@ config::ConfigModule
         let denominator = reserve_out - amount_out;
 
         (numerator / denominator) + &BigUint::from(1u64)
+    }
+
+    // returns lp fee, owner fee, total fee calculated from amount
+    fn get_fee_amounts(&self, amount: &BigUint, is_input: bool) -> (BigUint, BigUint, BigUint) {
+        let lp_fee = self.lp_fee().get();
+        let owner_fee = self.owner_fee().get();
+        let total_fee = lp_fee + owner_fee;
+
+        if is_input {
+            (amount * lp_fee / MAX_PERCENT, amount * owner_fee / MAX_PERCENT, amount * total_fee / MAX_PERCENT)
+        } else {
+            let total_fee_amount = amount * total_fee / (MAX_PERCENT - total_fee);
+            let lp_fee_amount = &total_fee_amount * lp_fee / total_fee;
+            let owner_fee_amount = &total_fee_amount - &lp_fee_amount;
+
+            (lp_fee_amount, owner_fee_amount, total_fee_amount)
+        }
     }
 
     fn only_owner_or_launchpad(&self) {

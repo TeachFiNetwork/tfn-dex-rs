@@ -73,17 +73,45 @@ pub trait ConfigModule {
         }
     }
 
-    // fee
-    #[view(getFee)]
-    #[storage_mapper("fee")]
-    fn fee(&self) -> SingleValueMapper<u64>;
+    // fees
+    #[view(getLPFee)]
+    #[storage_mapper("lp_fee")]
+    fn lp_fee(&self) -> SingleValueMapper<u64>;
 
     #[only_owner]
-    #[endpoint(setFee)]
-    fn set_fee(&self, fee: u64) {
-        require!(fee < MAX_PERCENT, ERROR_WRONG_FEE);
+    #[endpoint(setLPFee)]
+    fn set_lp_fee(&self, fee: u64) {
+        require!(fee + self.owner_fee().get() < MAX_PERCENT, ERROR_WRONG_FEE);
 
-        self.fee().set(fee);
+        self.lp_fee().set(fee);
+    }
+
+    #[view(getOwnerFee)]
+    #[storage_mapper("owner_fee")]
+    fn owner_fee(&self) -> SingleValueMapper<u64>;
+
+    #[only_owner]
+    #[endpoint(setOwnerFee)]
+    fn set_owner_fee(&self, fee: u64) {
+        require!(fee + self.lp_fee().get() < MAX_PERCENT, ERROR_WRONG_FEE);
+
+        self.owner_fee().set(fee);
+    }
+
+    #[view(getCummulatedFees)]
+    #[storage_mapper("cummulated_fees")]
+    fn cummulated_fees(&self) -> MapMapper<TokenIdentifier, BigUint>;
+
+    #[only_owner]
+    #[endpoint(withdrawFees)]
+    fn withdraw_fees(&self) {
+        let caller = self.blockchain().get_caller();
+        let mut payments: ManagedVec<EsdtTokenPayment> = ManagedVec::new();
+        for (token, amount) in self.cummulated_fees().iter() {
+            payments.push(EsdtTokenPayment::new(token, 0, amount));
+        }
+        self.cummulated_fees().clear();
+        self.send().direct_multi(&caller, &payments);
     }
 
     // base tokens
