@@ -6,6 +6,7 @@ pub mod common;
 pub mod swap;
 pub mod liquidity;
 pub mod helpers;
+pub mod proxies;
 
 use common::{config::*, consts::*, errors::*};
 
@@ -15,18 +16,11 @@ common::config::ConfigModule
 +helpers::HelpersModule
 {
     #[init]
-    fn init(
-        &self,
-        governance_token: TokenIdentifier,
-        launchpad_sc: ManagedAddress,
-    ) {
-        self.base_tokens().insert(governance_token);
-        self.launchpad_address().set(launchpad_sc);
+    fn init(&self) {
     }
 
     #[upgrade]
     fn upgrade(&self) {
-        // self.set_state_inactive();
     }
 
     #[payable("EGLD")]

@@ -2,6 +2,7 @@ multiversx_sc::imports!();
 multiversx_sc::derive_imports!();
 
 use crate::common::{errors::*, consts::*};
+use crate::proxies::launchpad_proxy::{self};
 
 #[type_abi]
 #[derive(ManagedVecItem, TopEncode, TopDecode, NestedEncode, NestedDecode, PartialEq, Eq, Copy, Clone, Debug)]
@@ -38,6 +39,9 @@ pub trait ConfigModule {
     #[only_owner]
     #[endpoint(setStateActive)]
     fn set_state_active(&self) {
+        require!(!self.launchpad_address().is_empty(), ERROR_LAUNCHPAD_ADDRESS_NOT_SET);
+        require!(!self.base_tokens().is_empty(), ERROR_NO_BASE_TOKENS);
+
         self.state().set(State::Active);
     }
 
@@ -59,7 +63,14 @@ pub trait ConfigModule {
     #[only_owner]
     #[endpoint(setLaunchpadAddress)]
     fn set_launchpad_address(&self, address: ManagedAddress) {
-        self.launchpad_address().set(address);
+        self.launchpad_address().set(&address);
+        let governance_token: TokenIdentifier = self.launchpad_contract_proxy()
+            .contract(address)
+            .governance_token()
+            .execute_on_dest_context();
+        if !self.base_tokens().contains(&governance_token) {
+            self.base_tokens().insert(governance_token);
+        }
     }
 
     // fee
@@ -128,4 +139,8 @@ pub trait ConfigModule {
 
         None
     }
+
+    // proxies
+    #[proxy]
+    fn launchpad_contract_proxy(&self) -> launchpad_proxy::Proxy<Self::Api>;
 }
