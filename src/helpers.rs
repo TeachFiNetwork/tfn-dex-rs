@@ -1,7 +1,11 @@
+use crate::common::{config, errors::*};
+
 multiversx_sc::imports!();
 
 #[multiversx_sc::module]
-pub trait HelpersModule {
+pub trait HelpersModule:
+config::ConfigModule
+{
     fn quote(
         &self,
         token_amount: &BigUint,
@@ -33,5 +37,13 @@ pub trait HelpersModule {
         let denominator = reserve_out - amount_out;
 
         (numerator / denominator) + &BigUint::from(1u64)
+    }
+
+    fn only_owner_or_launchpad(&self) {
+        let caller = self.blockchain().get_caller();
+        require!(
+            caller == self.blockchain().get_owner_address() || caller == self.launchpad_address().get(),
+            ERROR_ONLY_OWNER_OR_LAUNCHPAD
+        );
     }
 }

@@ -9,3 +9,6 @@ pub static ERROR_WRONG_PAYMENT: &[u8] = b"wrong payment token(s)";
 pub static ERROR_WRONG_FEE: &[u8] = b"wrong fee";
 pub static ERROR_INSUFFICIENT_OUTPUT_AMOUNT: &[u8] = b"insufficient output amount";
 pub static ERROR_INSUFFICIENT_INPUT_AMOUNT: &[u8] = b"insufficient input amount";
+pub static ERROR_BASE_TOKEN_EXISTS: &[u8] = b"base token already exists";
+pub static ERROR_BASE_TOKEN_IN_USE: &[u8] = b"base token in use";
+pub static ERROR_ONLY_OWNER_OR_LAUNCHPAD: &[u8] = b"only the owner or the launchpad can call this function";

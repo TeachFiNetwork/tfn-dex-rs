@@ -51,6 +51,17 @@ pub trait ConfigModule {
     #[storage_mapper("state")]
     fn state(&self) -> SingleValueMapper<State>;
 
+    // launchpad sc
+    #[view(getLaunchpadAddress)]
+    #[storage_mapper("launchpad_address")]
+    fn launchpad_address(&self) -> SingleValueMapper<ManagedAddress>;
+
+    #[only_owner]
+    #[endpoint(setLaunchpadAddress)]
+    fn set_launchpad_address(&self, address: ManagedAddress) {
+        self.launchpad_address().set(address);
+    }
+
     // fee
     #[view(getFee)]
     #[storage_mapper("fee")]

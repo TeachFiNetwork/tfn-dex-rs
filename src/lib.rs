@@ -11,11 +11,17 @@ use common::{config::*, consts::*, errors::*};
 
 #[multiversx_sc::contract]
 pub trait TFNDEXContract<ContractReader>:
-    common::config::ConfigModule
+common::config::ConfigModule
++helpers::HelpersModule
 {
     #[init]
-    fn init(&self, governance_token: TokenIdentifier) {
+    fn init(
+        &self,
+        governance_token: TokenIdentifier,
+        launchpad_sc: ManagedAddress,
+    ) {
         self.base_tokens().insert(governance_token);
+        self.launchpad_address().set(launchpad_sc);
     }
 
     #[upgrade]
@@ -24,9 +30,9 @@ pub trait TFNDEXContract<ContractReader>:
     }
 
     #[payable("EGLD")]
-    #[only_owner]
     #[endpoint(createPair)]
     fn create_pair(&self, base_token: TokenIdentifier, token: TokenIdentifier, decimals: u8) {
+        self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(self.base_tokens().contains(&base_token), ERROR_WRONG_BASE_TOKEN);
         require!(base_token != token, ERROR_WRONG_BASE_TOKEN);
@@ -101,9 +107,9 @@ pub trait TFNDEXContract<ContractReader>:
         }
     }
 
-    #[only_owner]
     #[endpoint(setPairActive)]
     fn set_pair_active(&self, id: usize) {
+        self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
@@ -114,9 +120,9 @@ pub trait TFNDEXContract<ContractReader>:
         self.pair(id).set(pair);
     }
 
-    #[only_owner]
     #[endpoint(setPairActiveNoSwap)]
     fn set_pair_active_no_swap(&self, id: usize) {
+        self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
@@ -125,14 +131,40 @@ pub trait TFNDEXContract<ContractReader>:
         self.pair(id).set(pair);
     }
 
-    #[only_owner]
     #[endpoint(setPairInactive)]
     fn set_pair_inactive(&self, id: usize) {
+        self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
         let mut pair = self.pair(id).get();
         pair.state = PairState::Inactive;
         self.pair(id).set(pair);
+    }
+
+    #[only_owner]
+    #[endpoint(addBaseToken)]
+    fn add_base_token(&self, token: TokenIdentifier) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+        require!(!self.base_tokens().contains(&token), ERROR_BASE_TOKEN_EXISTS);
+
+        self.base_tokens().insert(token);
+    }
+
+    #[only_owner]
+    #[endpoint(removeBaseToken)]
+    fn remove_base_token(&self, token: TokenIdentifier) {
+        require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
+        require!(self.base_tokens().contains(&token), ERROR_WRONG_BASE_TOKEN);
+
+        for pair_id in 0..self.last_pair_id().get() {
+            if self.pair(pair_id).is_empty() {
+                continue;
+            }
+
+            let pair = self.pair(pair_id).get();
+            require!(pair.base_token != token, ERROR_BASE_TOKEN_IN_USE);
+        }
+        self.base_tokens().swap_remove(&token);
     }
 }
