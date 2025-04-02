@@ -21,6 +21,10 @@ common::config::ConfigModule
         };
         require!(pair.state != PairState::Inactive, ERROR_PAIR_NOT_ACTIVE);
 
+        if pair.lp_supply == 0 {
+            self.only_owner_or_launchpad();
+        }
+
         let caller = self.blockchain().get_caller();
         let (mut base_amount, mut token_amount) = if payments.get(0).token_identifier == pair.token {
             (payments.get(1).amount, payments.get(0).amount)

@@ -136,7 +136,7 @@ common::config::ConfigModule
         require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
         let mut pair = self.pair(id).get();
-        require!(pair.lp_supply > BigUint::zero(), ERROR_NO_LIQUIDITY);
+        require!(pair.lp_supply > 0, ERROR_NO_LIQUIDITY);
 
         pair.state = PairState::Active;
         self.pair(id).set(pair);
@@ -149,6 +149,8 @@ common::config::ConfigModule
         require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
         let mut pair = self.pair(id).get();
+        require!(pair.lp_supply > 0, ERROR_NO_LIQUIDITY);
+
         pair.state = PairState::ActiveNoSwap;
         self.pair(id).set(pair);
     }
