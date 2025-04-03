@@ -13,5 +13,6 @@ pub static ERROR_BASE_TOKEN_EXISTS: &[u8] = b"base token already exists";
 pub static ERROR_BASE_TOKEN_IN_USE: &[u8] = b"base token in use";
 pub static ERROR_ONLY_OWNER_OR_LAUNCHPAD: &[u8] = b"only the owner or the launchpad can call this function";
 pub static ERROR_LAUNCHPAD_ADDRESS_NOT_SET: &[u8] = b"launchpad address not set";
+pub static ERROR_LAUNCHPAD_ADDRESS_ALREADY_SET: &[u8] = b"launchpad address already set";
 pub static ERROR_NO_BASE_TOKENS: &[u8] = b"no base tokens";
 pub static ERROR_ZERO_AMOUNT: &[u8] = b"zero amount";

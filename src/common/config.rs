@@ -60,9 +60,12 @@ pub trait ConfigModule {
     #[storage_mapper("launchpad_address")]
     fn launchpad_address(&self) -> SingleValueMapper<ManagedAddress>;
 
-    #[only_owner]
+    // should only be called by the Launchpad contract at initialization
     #[endpoint(setLaunchpadAddress)]
-    fn set_launchpad_address(&self, address: ManagedAddress) {
+    fn set_launchpad_address(&self) {
+        require!(self.launchpad_address().is_empty(), ERROR_LAUNCHPAD_ADDRESS_ALREADY_SET);
+
+        let address = self.blockchain().get_caller();
         self.launchpad_address().set(&address);
         let governance_token: TokenIdentifier = self.launchpad_contract_proxy()
             .contract(address)
@@ -71,6 +74,7 @@ pub trait ConfigModule {
         if !self.base_tokens().contains(&governance_token) {
             self.base_tokens().insert(governance_token);
         }
+        self.set_state_active();
     }
 
     // fees
