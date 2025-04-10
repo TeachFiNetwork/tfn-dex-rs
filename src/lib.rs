@@ -27,7 +27,7 @@ common::config::ConfigModule
 
     #[payable("EGLD")]
     #[endpoint(createPair)]
-    fn create_pair(&self, base_token: TokenIdentifier, token: TokenIdentifier, decimals: u8) {
+    fn create_pair(&self, base_token: TokenIdentifier, token: TokenIdentifier) {
         self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
         require!(self.base_tokens().contains(&base_token), ERROR_WRONG_BASE_TOKEN);
@@ -66,7 +66,7 @@ common::config::ConfigModule
                     can_add_special_roles: true,
                 },
             )
-            .with_callback(self.callbacks().lp_token_issue_callback(self.blockchain().get_caller(), &base_token, &token, decimals))
+            .with_callback(self.callbacks().lp_token_issue_callback(self.blockchain().get_caller(), &base_token, &token))
             .async_call_and_exit();
     }
 
@@ -76,7 +76,6 @@ common::config::ConfigModule
         caller: ManagedAddress,
         base_token: &TokenIdentifier,
         token: &TokenIdentifier,
-        decimals: u8,
         #[call_result] result: ManagedAsyncCallResult<TokenIdentifier>,
     ) {
         match result {
@@ -86,7 +85,6 @@ common::config::ConfigModule
                     id,
                     state: PairState::ActiveNoSwap,
                     token: token.clone(),
-                    decimals,
                     base_token: base_token.clone(),
                     lp_token,
                     lp_supply: BigUint::zero(),
@@ -104,7 +102,7 @@ common::config::ConfigModule
     }
 
     // function only used by tests
-    fn test_create_pair(&self, base_token: TokenIdentifier, token: TokenIdentifier, decimals: u8) -> TokenIdentifier {
+    fn test_create_pair(&self, base_token: TokenIdentifier, token: TokenIdentifier) -> TokenIdentifier {
         let mut lp_ticker = token.ticker().concat(base_token.ticker());
         if lp_ticker.len() > 10 {
             lp_ticker = lp_ticker.copy_slice(0, 10).unwrap();
@@ -116,7 +114,6 @@ common::config::ConfigModule
             id,
             state: PairState::ActiveNoSwap,
             token: token.clone(),
-            decimals,
             base_token: base_token.clone(),
             lp_token: lp_token.clone(),
             lp_supply: BigUint::zero(),

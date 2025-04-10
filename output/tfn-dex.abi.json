@@ -40,10 +40,6 @@
                 {
                     "name": "token",
                     "type": "TokenIdentifier"
-                },
-                {
-                    "name": "decimals",
-                    "type": "u8"
                 }
             ],
             "outputs": []
@@ -405,10 +401,6 @@
                 {
                     "name": "token",
                     "type": "TokenIdentifier"
-                },
-                {
-                    "name": "decimals",
-                    "type": "u8"
                 },
                 {
                     "name": "base_token",

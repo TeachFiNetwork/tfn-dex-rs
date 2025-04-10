@@ -25,7 +25,6 @@ pub struct Pair<M: ManagedTypeApi> {
     pub id: usize,
     pub state: PairState,
     pub token: TokenIdentifier<M>,
-    pub decimals: u8,
     pub base_token: TokenIdentifier<M>,
     pub lp_token: TokenIdentifier<M>,
     pub lp_supply: BigUint<M>,
