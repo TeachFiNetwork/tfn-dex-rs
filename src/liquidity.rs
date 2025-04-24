@@ -60,7 +60,7 @@ common::config::ConfigModule
         pair.liquidity_base += &base_amount;
         pair.liquidity_token += &token_amount;
         pair.lp_supply += &lp_token_amount;
-        self.pair(pair.id).set(&pair);
+        self.pairs(pair.id).set(&pair);
 
         self.send().esdt_local_mint(&pair.lp_token, 0, &lp_token_amount);
         self.send().direct_esdt(&caller, &pair.lp_token, 0, &lp_token_amount);
@@ -89,7 +89,7 @@ common::config::ConfigModule
         if pair.lp_supply == 0 {
             pair.state = PairState::ActiveNoSwap;
         }
-        self.pair(pair.id).set(&pair);
+        self.pairs(pair.id).set(&pair);
 
         self.send().esdt_local_burn(&pair.lp_token, 0, &lp_token_amount);
         self.send().direct_esdt(&caller, &pair.base_token, 0, &base_amount);

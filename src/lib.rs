@@ -46,6 +46,7 @@ common::config::ConfigModule
             lp_ticker = lp_ticker.copy_slice(0, 10).unwrap();
         }
         let issue_cost = self.call_value().egld_value().clone_value();
+        require!(issue_cost == BigUint::from(50_000_000_000_000_000_u64), ERROR_WRONG_ISSUE_COST);
 
         self.send()
             .esdt_system_sc_proxy()
@@ -92,7 +93,7 @@ common::config::ConfigModule
                     liquidity_base: BigUint::zero(),
                 };
                 self.last_pair_id().set(id + 1);
-                self.pair(id).set(pair);
+                self.pairs(id).set(pair);
             }
             ManagedAsyncCallResult::Err(_) => {
                 let issue_cost = self.call_value().egld_value();
@@ -130,37 +131,37 @@ common::config::ConfigModule
     fn set_pair_active(&self, id: usize) {
         self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
-        require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
+        require!(!self.pairs(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
-        let mut pair = self.pair(id).get();
+        let mut pair = self.pairs(id).get();
         require!(pair.lp_supply > 0, ERROR_NO_LIQUIDITY);
 
         pair.state = PairState::Active;
-        self.pair(id).set(pair);
+        self.pairs(id).set(pair);
     }
 
     #[endpoint(setPairActiveNoSwap)]
     fn set_pair_active_no_swap(&self, id: usize) {
         self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
-        require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
+        require!(!self.pairs(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
-        let mut pair = self.pair(id).get();
+        let mut pair = self.pairs(id).get();
         require!(pair.lp_supply > 0, ERROR_NO_LIQUIDITY);
 
         pair.state = PairState::ActiveNoSwap;
-        self.pair(id).set(pair);
+        self.pairs(id).set(pair);
     }
 
     #[endpoint(setPairInactive)]
     fn set_pair_inactive(&self, id: usize) {
         self.only_owner_or_launchpad();
         require!(self.state().get() == State::Active, ERROR_NOT_ACTIVE);
-        require!(!self.pair(id).is_empty(), ERROR_PAIR_NOT_FOUND);
+        require!(!self.pairs(id).is_empty(), ERROR_PAIR_NOT_FOUND);
 
-        let mut pair = self.pair(id).get();
+        let mut pair = self.pairs(id).get();
         pair.state = PairState::Inactive;
-        self.pair(id).set(pair);
+        self.pairs(id).set(pair);
     }
 
     #[only_owner]
@@ -179,11 +180,11 @@ common::config::ConfigModule
         require!(self.base_tokens().contains(&token), ERROR_WRONG_BASE_TOKEN);
 
         for pair_id in 0..self.last_pair_id().get() {
-            if self.pair(pair_id).is_empty() {
+            if self.pairs(pair_id).is_empty() {
                 continue;
             }
 
-            let pair = self.pair(pair_id).get();
+            let pair = self.pairs(pair_id).get();
             require!(pair.base_token != token, ERROR_BASE_TOKEN_IN_USE);
         }
         self.base_tokens().swap_remove(&token);

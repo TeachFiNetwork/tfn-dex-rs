@@ -17,3 +17,4 @@ pub static ERROR_LAUNCHPAD_ADDRESS_ALREADY_SET: &[u8] = b"launchpad address alre
 pub static ERROR_NO_BASE_TOKENS: &[u8] = b"no base tokens";
 pub static ERROR_ZERO_AMOUNT: &[u8] = b"zero amount";
 pub static ERROR_NOT_SUBSCRIBER: &[u8] = b"only the platform subscriber can call this function";
+pub static ERROR_WRONG_ISSUE_COST: &[u8] = b"wrong issue cost";

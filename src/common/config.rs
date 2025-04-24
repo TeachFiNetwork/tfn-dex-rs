@@ -125,7 +125,7 @@ pub trait ConfigModule {
     // pairs
     #[view(getPair)]
     #[storage_mapper("pairs")]
-    fn pair(&self, id: usize) -> SingleValueMapper<Pair<Self::Api>>;
+    fn pairs(&self, id: usize) -> SingleValueMapper<Pair<Self::Api>>;
 
     #[view(getLastPairId)]
     #[storage_mapper("last_pair_id")]
@@ -136,7 +136,7 @@ pub trait ConfigModule {
         let last_pair_id = self.last_pair_id().get();
         let mut pairs = ManagedVec::new();
         for id in 0..last_pair_id {
-            pairs.push(self.pair(id).get());
+            pairs.push(self.pairs(id).get());
         }
 
         pairs
@@ -146,7 +146,7 @@ pub trait ConfigModule {
     fn get_pair_by_tickers(&self, base_token: &TokenIdentifier, token: &TokenIdentifier) -> Option<Pair<Self::Api>> {
         let last_pair_id = self.last_pair_id().get();
         for id in 0..last_pair_id {
-            let pair = self.pair(id).get();
+            let pair = self.pairs(id).get();
             if &pair.base_token == base_token && &pair.token == token {
                 return Some(pair);
             }
@@ -162,7 +162,7 @@ pub trait ConfigModule {
     fn get_pair_by_lp_token(&self, lp_token: &TokenIdentifier) -> Option<Pair<Self::Api>> {
         let last_pair_id = self.last_pair_id().get();
         for id in 0..last_pair_id {
-            let pair = self.pair(id).get();
+            let pair = self.pairs(id).get();
             if &pair.lp_token == lp_token {
                 return Some(pair);
             }

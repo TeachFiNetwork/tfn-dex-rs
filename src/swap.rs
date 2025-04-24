@@ -38,7 +38,7 @@ common::config::ConfigModule
         self.cummulated_fees().insert(pair.base_token.clone(), self.cummulated_fees().get(&pair.base_token).unwrap_or(BigUint::zero()) + owner_fee);
         pair.liquidity_token = new_token_liquidity;
         pair.liquidity_base = new_base_liquidity;
-        self.pair(pair.id).set(&pair);
+        self.pairs(pair.id).set(&pair);
 
         self.send().direct_esdt(&self.blockchain().get_caller(), &token_out, 0, &amount_out);
     }
@@ -74,7 +74,7 @@ common::config::ConfigModule
         self.cummulated_fees().insert(pair.base_token.clone(), self.cummulated_fees().get(&pair.base_token).unwrap_or(BigUint::zero()) + owner_fee);
         pair.liquidity_token = new_token_liquidity;
         pair.liquidity_base = new_base_liquidity;
-        self.pair(pair.id).set(&pair);
+        self.pairs(pair.id).set(&pair);
 
         let caller = self.blockchain().get_caller();
         self.send().direct_esdt(&caller, &token_out, 0, &amount_out_wanted);
