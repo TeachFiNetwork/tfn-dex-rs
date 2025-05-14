@@ -46,7 +46,7 @@ common::config::ConfigModule
             lp_ticker = lp_ticker.copy_slice(0, 10).unwrap();
         }
         let issue_cost = self.call_value().egld_value().clone_value();
-        require!(issue_cost == BigUint::from(50_000_000_000_000_000_u64), ERROR_WRONG_ISSUE_COST);
+        require!(issue_cost == BigUint::from(TOKEN_ISSUE_COST), ERROR_WRONG_ISSUE_COST);
 
         self.send()
             .esdt_system_sc_proxy()
